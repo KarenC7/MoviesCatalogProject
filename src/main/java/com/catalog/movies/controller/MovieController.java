@@ -95,7 +95,6 @@ public class MovieController {
             @RequestParam(defaultValue = "createdDate") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
 
-        // Construir Specification dinámica
         Specification<Movie> spec = Specification.where(null);
 
         if (search != null && !search.isEmpty()) {
@@ -110,11 +109,9 @@ public class MovieController {
             spec = spec.and(MovieSpecifications.releaseYearEquals(releaseYear));
         }
 
-        // Manejar el ordenamiento. Se asume que para 'rating' se realiza un join y se calcula el promedio.
+
         Sort sort;
         if (sortBy.equalsIgnoreCase("rating")) {
-            // Este ejemplo asume que en el repositorio se ha definido un join para el campo 'averageRating'
-            // y que dicho campo se puede ordenar.
             sort = sortDir.equalsIgnoreCase("asc")
                     ? Sort.by("ratings").ascending()
                     : Sort.by("ratings").descending();
