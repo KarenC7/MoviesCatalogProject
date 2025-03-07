@@ -42,12 +42,12 @@ The app is writed with Spring Boot 2.7.X and Java 11 using a connection to a MYS
 - Cache the response of the list movie endpoint
 
 **MAVEN RUN**  
-mvn clean install    <- Clean and run test
-mvn spring-boot:run  <- Run application
+- mvn clean install    <- Clean and run test
+- mvn spring-boot:run  <- Run application
 
-
-Postman Collection Path: movies\src\main\resources\MoviesCatalogAPIKarenCastillo.postman_collection (Import in Postman)
-MySQL database called: movies\src\main\resources\movies_catalog.sql
-DB User: Root
-DB Password: Root
+**POSTMAN COLLECTION AND MYSQL DATABASE**
+- Postman Collection Path: movies\src\main\resources\MoviesCatalogAPIKarenCastillo.postman_collection (Import in Postman)
+- MySQL database called: movies\src\main\resources\movies_catalog.sql
+- DB User: Root
+- DB Password: Root
 
