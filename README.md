@@ -22,10 +22,10 @@ The app is writed with Spring Boot 2.7.X and Java 11 using a connection to a MYS
 **Movies:**
 - Endpoints where admins can manage movies (add, update, delete). Only admin users can access this endpoint.
 - Create an endpoint to return movies. The endpoint should be:
-    >Searchable by name or synopsis content
-    >Filterable by category, year of release
-    >Paginated, specify how many movies you want per page
-    >Orderable by year, name, created date or rating
+*Searchable by name or synopsis content.*
+*Filterable by category, year of release.*
+*Paginated, specify how many movies you want per page.*
+*Orderable by year, name, created date or rating.*
 
 **Authentication:**
 - Endpoint to authenticate the user. Provide his user and password if valid; you will return a JWt token.
