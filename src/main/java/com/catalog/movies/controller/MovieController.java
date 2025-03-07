@@ -1,17 +1,24 @@
 package com.catalog.movies.controller;
 
-import com.catalog.movies.exception.ResourceNotFoundException;
+import com.catalog.movies.dto.MovieResponseDTO;
 import com.catalog.movies.model.Movie;
+import com.catalog.movies.model.User;
 import com.catalog.movies.services.MovieService;
+import com.catalog.movies.services.UserService;
+import com.catalog.movies.specification.MovieSpecifications;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -21,26 +28,51 @@ import java.util.List;
 @RequestMapping("/api/movies")
 public class MovieController {
 
+    private final MovieService movieService;
+    private final UserService userService;
     @Autowired
-    private MovieService movieService;
+    ModelMapper modelMapper;
 
-    // ADMIN only endpoint: create movie
+    @Autowired
+    public MovieController(MovieService movieService, UserService userService) {
+        this.movieService = movieService;
+        this.userService = userService;
+    }
+
+    @Operation(summary = "Get movie catalog", description = "Return movie catalog with pages and filters")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "No authorized")
+    })
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Movie> createMovie(@Valid @RequestBody Movie movie) {
-        Movie savedMovie = movieService.createMovie(movie);
+    public ResponseEntity<MovieResponseDTO> createMovie(@Valid @RequestBody Movie movie) {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + email));
+        movie.setCreatedBy(user);
+        MovieResponseDTO savedMovie = movieService.createMovie(movie);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedMovie);
     }
 
-    // ADMIN only endpoint: update movie
+    @Operation(summary = "Update a movie from catalog", description = "Return movie updated")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "No authorized")
+    })
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Movie> updateMovie(@PathVariable Long id, @Valid @RequestBody Movie movie) throws ResourceNotFoundException {
-        Movie updatedMovie = movieService.updateMovie(id, movie);
+    public ResponseEntity<MovieResponseDTO> updateMovie(@PathVariable Long id, @Valid @RequestBody Movie movie) {
+        MovieResponseDTO updatedMovie = movieService.updateMovie(id, movie);
         return ResponseEntity.ok(updatedMovie);
     }
 
-    // ADMIN only endpoint: delete movie
+    @Operation(summary = "Delete a movie from catalog", description = "Return response")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "No authorized")
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
@@ -48,9 +80,13 @@ public class MovieController {
         return ResponseEntity.noContent().build();
     }
 
-    // List movies with filtering, searching, pagination and ordering
+    @Operation(summary = "Get movie catalog", description = "Return movie catalog with pages and filters")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "No authorized")
+    })
     @GetMapping
-    public ResponseEntity<Page<Movie>> listMovies(
+    public ResponseEntity<Page<MovieResponseDTO>> listMovies(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) List<String> category,
             @RequestParam(required = false) Integer releaseYear,
@@ -59,22 +95,37 @@ public class MovieController {
             @RequestParam(defaultValue = "createdDate") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
 
-        // Validate how to build specification dynamically for search and filtering
+        // Construir Specification dinámica
         Specification<Movie> spec = Specification.where(null);
-     /*
-        Object MovieSpecifications;
+
         if (search != null && !search.isEmpty()) {
-            spec = spec.and(MovieSpecifications.nameOrSynopsisContains(search));
+            spec = spec.and(MovieSpecifications.containsNameOrSynopsis(search));
         }
+
         if (category != null && !category.isEmpty()) {
             spec = spec.and(MovieSpecifications.hasCategories(category));
         }
+
         if (releaseYear != null) {
             spec = spec.and(MovieSpecifications.releaseYearEquals(releaseYear));
-        }*/
-        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Movie> moviesPage = movieService.getMovies(spec, pageable);
+        }
+
+        // Manejar el ordenamiento. Se asume que para 'rating' se realiza un join y se calcula el promedio.
+        Sort sort;
+        if (sortBy.equalsIgnoreCase("rating")) {
+            // Este ejemplo asume que en el repositorio se ha definido un join para el campo 'averageRating'
+            // y que dicho campo se puede ordenar.
+            sort = sortDir.equalsIgnoreCase("asc")
+                    ? Sort.by("ratings").ascending()
+                    : Sort.by("ratings").descending();
+        } else {
+            sort = sortDir.equalsIgnoreCase("asc")
+                    ? Sort.by(sortBy).ascending()
+                    : Sort.by(sortBy).descending();
+        }
+
+        PageRequest pageable = PageRequest.of(page, size, sort);
+        Page<MovieResponseDTO> moviesPage = movieService.getMovies(spec, pageable);
         return ResponseEntity.ok(moviesPage);
     }
 }

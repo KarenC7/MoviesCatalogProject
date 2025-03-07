@@ -31,18 +31,19 @@ public class UserService {
      * @return The user saved in the database.
      */
     public User registerUser(RegisterRequest registerRequest) {
-        // Verify if a user with the same email already exists
         Optional<User> existingUser = userRepository.findByEmail(registerRequest.getEmail());
         if (existingUser.isPresent()) {
-            throw new RuntimeException("El correo ya se encuentra registrado.");
+            throw new RuntimeException("Email already registered.");
         }
 
         User user = new User();
         user.setEmail(registerRequest.getEmail());
-        // Encrypt password before to save it
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        // Assign a new role
-        user.setRole(Role.USER);
+        if (registerRequest.getRole() != null && registerRequest.getRole().equalsIgnoreCase("ADMIN")) {
+            user.setRole(Role.ADMIN);
+        } else {
+            user.setRole(Role.USER);
+        }
 
         return userRepository.save(user);
     }

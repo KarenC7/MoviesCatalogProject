@@ -1,5 +1,6 @@
 package com.catalog.movies.services;
 
+import com.catalog.movies.dto.RatingResponseDTO;
 import com.catalog.movies.model.Movie;
 import com.catalog.movies.model.Rating;
 import com.catalog.movies.model.User;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RatingService {
@@ -20,8 +22,7 @@ public class RatingService {
     @Autowired
     private MovieRepository movieRepository;
 
-    public Rating rateMovie(Long movieId, Long userId, Integer ratingValue) throws ResourceNotFoundException {
-        // Ensure the user hasn't already rated the movie.
+    public RatingResponseDTO rateMovie(Long movieId, Long userId, Integer ratingValue) throws ResourceNotFoundException {
         if (ratingRepository.findByUserIdAndMovieId(userId, movieId).isPresent()) {
             throw new RuntimeException("Movie already rated by user");
         }
@@ -29,12 +30,11 @@ public class RatingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Movie not found"));
         Rating rating = new Rating();
         rating.setMovie(movie);
-        // In production, you should retrieve User entity from the security context.
         User user = new User();
         user.setId(userId);
         rating.setUser(user);
         rating.setRating(ratingValue);
-        return ratingRepository.save(rating);
+        return convertToDto(ratingRepository.save(rating));
     }
 
     public void removeRating(Long movieId, Long userId) throws ResourceNotFoundException {
@@ -43,7 +43,25 @@ public class RatingService {
         ratingRepository.delete(rating);
     }
 
-    public List<Rating> getUserRatings(Long userId) {
-        return ratingRepository.findByUserId(userId);
+    public List<RatingResponseDTO> getUserRatings(Long userId) {
+        List<Rating> ratings = ratingRepository.findByUserId(userId);
+        return ratings.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public RatingResponseDTO convertToDto(Rating rating) {
+        RatingResponseDTO dto = new RatingResponseDTO();
+        dto.setId(rating.getId());
+        dto.setRating(rating.getRating());
+        if (rating.getUser() != null) {
+            dto.setUserId(rating.getUser().getId());
+            dto.setUserEmail(rating.getUser().getEmail());
+        }
+        if (rating.getMovie() != null) {
+            dto.setMovieId(rating.getMovie().getId());
+            dto.setMovieName(rating.getMovie().getName());
+        }
+        return dto;
     }
 }

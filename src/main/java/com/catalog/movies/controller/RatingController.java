@@ -1,9 +1,12 @@
 package com.catalog.movies.controller;
 
-import com.catalog.movies.model.Rating;
+import com.catalog.movies.dto.RatingResponseDTO;
 import com.catalog.movies.model.User;
 import com.catalog.movies.services.RatingService;
 import com.catalog.movies.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,34 +29,29 @@ public class RatingController {
         this.userService = userService;
     }
 
-    /**
-     * Endpoint to allow user rating the movie
-     * URL: POST /api/ratings/{movieId}?rating=valor
-     *
-     * @param movieId movie id
-     * @param rating  rating (ej. 1 to 5).
-     * @return Created rating
-     */
+    @Operation(summary = "Save a rate for a movie", description = "Post a new rate for a movie id and pass the rate value 1 to 5")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "No authorized")
+    })
     @PostMapping("/{movieId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Rating> rateMovie(@PathVariable Long movieId, @RequestParam Integer rating) {
+    public ResponseEntity<RatingResponseDTO> rateMovie(@PathVariable Long movieId, @RequestParam Integer rating) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         // After extract the email, search user in bd
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
         // Create rating throght the service
-        Rating createdRating = ratingService.rateMovie(movieId, user.getId(), rating);
+        RatingResponseDTO createdRating = ratingService.rateMovie(movieId, user.getId(), rating);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRating);
     }
 
-    /**
-     * Endpoint to allow user remove the rating
-     * URL: DELETE /api/ratings/{movieId}
-     *
-     * @param movieId movie id to remove rating
-     * @return HTTP 204 (No Content) it it was succesfuly deleted.
-     */
+    @Operation(summary = "Delete a movie from catalog", description = "Return empty when it is deleted")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "No authorized")
+    })
     @DeleteMapping("/{movieId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> removeRating(@PathVariable Long movieId) {
@@ -64,19 +62,18 @@ public class RatingController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Endpoint to get all ratings from the authenticated user
-     * URL: GET /api/ratings/my
-     *
-     * @return List of ratings.
-     */
+    @Operation(summary = "Get all rates for all movies by current user", description = "Return all rates created by the authenticated user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "401", description = "No authorized")
+    })
     @GetMapping("/my")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<Rating>> getMyRatings() {
+    public ResponseEntity<List<RatingResponseDTO>> getMyRatings() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
-        List<Rating> ratings = ratingService.getUserRatings(user.getId());
+        List<RatingResponseDTO> ratings = ratingService.getUserRatings(user.getId());
         return ResponseEntity.ok(ratings);
     }
 }
