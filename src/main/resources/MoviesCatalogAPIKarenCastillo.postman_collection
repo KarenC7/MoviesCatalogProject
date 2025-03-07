@@ -1,0 +1,451 @@
+{
+	"info": {
+		"_postman_id": "78c7b93f-b7e3-4317-ab27-41f98fcfd30f",
+		"name": "Movies Catalog API Updated V2",
+		"description": "Collection for testing API with movie endpoints (create, update, delete), rating endpoints and authorization requests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7928992"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"item": [
+				{
+					"name": "Register Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"karen_admin@example.com\",\n    \"password\": \"admin123\",\n    \"role\": \"ADMIN\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"user123\",\n    \"role\": \"USER\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Login",
+			"item": [
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Check if status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check if response has format JSON\", function() {\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check if json has an access key\", function() {\r",
+									"    pm.response.to.have.jsonBody(\"accessToken\");\r",
+									"    var json = JSON.parse(responseBody);\r",
+									"    pm.globals.set(\"token\", `${json.accessToken}`);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"karen_admin@example.com\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"user123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Movies",
+			"item": [
+				{
+					"name": "Get Movies Catalog",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJrYXJlbl9hZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0MTMzMzIxNCwiZXhwIjoxNzQxOTM4MDE0fQ.T4XvsPgjs8Hsat73eLYmiBUci9VNK7KyGSqHkhpuxwumJ3yutn14cO1aSGJMmq8i3pk3ek6VpM3Xk9_-iIOfVA"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/movies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Movies with Filters",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/movies?search=avengers&category=Action&category=Adventure&releaseYear=2012&page=0&size=5&sortBy=rating&sortDir=desc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movies"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "avengers"
+								},
+								{
+									"key": "category",
+									"value": "Action"
+								},
+								{
+									"key": "category",
+									"value": "Adventure"
+								},
+								{
+									"key": "releaseYear",
+									"value": "2012"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								},
+								{
+									"key": "sortBy",
+									"value": "rating"
+								},
+								{
+									"key": "sortDir",
+									"value": "desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Movie (Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New Movie\",\n  \"releaseYear\": 2025,\n  \"synopsis\": \"Sinopsis de la nueva película.\",\n  \"categories\": [\"Action\", \"Adventure\"],\n  \"posterUrl\": \"http://example.com/poster.jpg\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/movies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Movie (Admin Only)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbjFAZXhhbXBsZS5jb20iLCJpYXQiOjE3NDEzMjI2NTEsImV4cCI6MTc0MTkyNzQ1MX0.wR2bIIBQe0sYgR0kwdm0KhKoXHXBVzp1TOZrVwBL4AU0UKxR92OJqa1yPavxQkgjLHkb4DOBzJacr35u3cdrsw"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Movie\",\n  \"releaseYear\": 2024,\n  \"synopsis\": \"Sinopsis actualizada de la película.\",\n  \"categories\": [\"Drama\"],\n  \"posterUrl\": \"http://example.com/updated_poster.jpg\",\n  \"createdByEmail\": \"karen_admin2@example.com\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/movies/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movies",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Movie (Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/movies/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movies",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Rating",
+			"item": [
+				{
+					"name": "Rate Movie (User)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/ratings/1?rating=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"ratings",
+								"1"
+							],
+							"query": [
+								{
+									"key": "rating",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Movies Rated by Authenticated User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbjFAZXhhbXBsZS5jb20iLCJpYXQiOjE3NDEzMjQ4ODIsImV4cCI6MTc0MTkyOTY4Mn0.359VjrZ9PeOcdrQ6GqUamX5A6e6mQC8jPeEc9szVlcHzrLCczpn5-dOnwMdC9bW0yCGMHWxWVBmjkZxgFMRJ-Q"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/ratings/my",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"ratings",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rate Movie",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/ratings/1?rating=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"ratings",
+								"1"
+							],
+							"query": [
+								{
+									"key": "rating",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "AccessToken",
+			"value": "AccessToken"
+		},
+		{
+			"key": "accessToken",
+			"value": "accessToken"
+		}
+	]
+}
