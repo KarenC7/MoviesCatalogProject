@@ -12,7 +12,6 @@ public class LoginRequest {
     @NotBlank(message = "Password is mandatory")
     private String password;
 
-    // Getters y Setters
 
     public String getEmail() {
         return email;

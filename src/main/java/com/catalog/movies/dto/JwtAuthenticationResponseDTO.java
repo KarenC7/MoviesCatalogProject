@@ -1,11 +1,11 @@
 package com.catalog.movies.dto;
 
-public class JwtAuthenticationResponse {
+public class JwtAuthenticationResponseDTO {
 
     private String accessToken;
     private String tokenType = "Bearer";
 
-    public JwtAuthenticationResponse(String accessToken) {
+    public JwtAuthenticationResponseDTO(String accessToken) {
         this.accessToken = accessToken;
     }
 

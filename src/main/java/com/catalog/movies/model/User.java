@@ -19,7 +19,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role; // ADMIN or USER
 
-    // relationships, e.g., movies created, ratings given, etc.
+    // relationships, movies created, ratings given, etc.
 
     @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
     private List<Movie> movies = new ArrayList<>();

@@ -11,7 +11,7 @@ public class Rating {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer rating; // e.g. 1 to 5
+    private Integer rating; // ex. 1 to 5
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

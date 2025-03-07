@@ -5,12 +5,15 @@ import javax.validation.constraints.NotBlank;
 
 public class RegisterRequest {
 
-    @NotBlank(message = "Email is mandatory")
-    @Email(message = "Email has to have a valid format")
+    @NotBlank(message = "Email mandatory")
+    @Email(message = "Email must have a valid format")
     private String email;
 
-    @NotBlank(message = "Password is mandatory")
+    @NotBlank(message = "Mandatory password")
     private String password;
+
+
+    private String role; // "ADMIN" or "USER"
 
     public String getEmail() {
         return email;
@@ -26,5 +29,13 @@ public class RegisterRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
