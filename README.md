@@ -7,7 +7,7 @@ http://localhost:8080/swagger-ui/index.html#/
 
 **POSTMAN COLLECTION AND MYSQL DATABASE**
 - Postman Collection Path: movies\src\main\resources\MoviesCatalogAPIKarenCastillo.postman_collection
-- MySQL database Path: movies\src\main\resources\movies_catalog.sql
+- MySQL database Path: movies\src\main\resources\movies_catalog\
 - DB User: Root
 - DB Password: Root
 
